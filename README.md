@@ -66,14 +66,17 @@ optional arguments:
 ## How It Works
 
 - *Download*: Fetches the latest Spotlight feed (configurable via `config.json`), saves images to `C:\ProgramData\SpotlightNow`, and hashes them to avoid duplicates.
+  - Scheduled task runs **once every hour** to attempt fetching a new image.
 - *Cache*: Tracks usage in `image_cache.json` so random selection favors the least‑used images.
 - *Registry*:
- - Writes all three `PersonalizationCSP` values:
-   - `LockScreenImagePath`
-   - `LockScreenImageUrl`
-   - `LockScreenImageStatus`
- - Writes Policy `Personalization` values:
-   - `LockScreenImage`
+  - Writes all three `PersonalizationCSP` values:
+    - `LockScreenImagePath`
+    - `LockScreenImageUrl`
+    - `LockScreenImageStatus`
+  - Writes Policy `Personalization` values:
+    - `LockScreenImage`
+- *Update*: Applies a new lock screen image from the cache.
+  - Scheduled task runs **at startup** to refresh the lock screen from a randomly selected least used image.
 
 ## Backstory
 
