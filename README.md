@@ -6,6 +6,14 @@ Includes deduplication (via hashing) and fair rotation (least‑used image selec
 
 ---
 
+## Quick Start (no Python required)
+
+1. Download the latest release zip from [Releases](https://github.com/chazix/SpotlightNow/releases/latest)
+2. Extract and run `install.bat`
+3. Enjoy daily Spotlight lock screen refreshes
+
+---
+
 ## Requirements
 - Windows 10/11 (Pro/Enterprise recommended, but works standalone)
 - Python 3.8+
@@ -38,11 +46,6 @@ python spotlight-now.py update-lockscreen
 4. Saves images to: `spotlight_images/*.jpg`
 
 5. Saves cache to: `image_cache.json`
-
-## Installation
-1. Download latest release
-
-2. Extract & Run: `install.bat`
 
 ## Usage
 
@@ -77,6 +80,3 @@ optional arguments:
 This project was born out of a detour through Windows' opaque personalization stack.
 What should have been a simple "new image every day" turned into a deep dive into registry keys, CSP values, and refresh rituals.
 The result: a simple, reproducible tool that makes Spotlight behave — now
-
-
-
