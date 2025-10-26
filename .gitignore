@@ -1,0 +1,11 @@
+[bB]uild
+[dD]ist
+[iI]nclude
+[lL]ib
+[rR]elease
+[sS]cripts
+spotlight_images
+image_cache.json
+pyvenv.cfg
+spotlight-now.spec
+spotlight-now.exe
