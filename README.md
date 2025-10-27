@@ -157,7 +157,7 @@ optional arguments:
     - `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\RotatingLockScreenOverlayEnabled`
     - `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager\SubscribedContent-338387Enabled`
 - *Update*: Applies a new lock screen image from the cache.
-  - Scheduled task runs **at startup** to refresh the lock screen from a randomly selected least used image.
+  - Scheduled task runs **at logon** to refresh the lock screen from a randomly selected least used image.
 - *Filesystem*:
   - On uninstall, deletes the application data directory:
     - `C:\ProgramData\SpotlightNow`
