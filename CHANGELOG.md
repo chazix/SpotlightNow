@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
   - `C:\ProgramData\SpotlightNow`
 - Build process updated: rebuilt with PyInstaller `--noconsole` so scheduled tasks run silently in the user session.
   - This was required because the update task now runs under the current user (to correctly target HKCU), and a console build would otherwise show a visible window.
+- `update-task.ps1`: switch to `-AtLogon` trigger to align with per-user context (startup trigger requires SYSTEM)
 
 ### Documentation
 - Refined README Quick Start and Python sections to include uninstall instructions and clarify admin requirements.
