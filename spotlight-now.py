@@ -103,6 +103,34 @@ def choose_random_least_used_image():
         f.write(json.dumps(data, indent=2))
     return chosen_image
 
+def check_and_set_spotlight_on_lockscreen() -> bool:
+    # first check if HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent has been disabled
+    has_personalization_policy = False
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", 0,
+                             winreg.KEY_READ)
+        current_value, _ = winreg.QueryValueEx(key, "DisableWindowsSpotlightOnLockScreen")
+        winreg.CloseKey(key)
+        if current_value == 1:
+            has_personalization_policy = True
+    except FileNotFoundError:
+        pass
+
+    if has_personalization_policy:
+        return False
+
+    # Create HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent if missing and disable spotlight
+    try:
+        key = winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE,
+                               r"SOFTWARE\Policies\Microsoft\Windows\CloudContent")
+        winreg.SetValueEx(key, "DisableWindowsSpotlightOnLockScreen", 0, winreg.REG_DWORD, 1)
+        winreg.CloseKey(key)
+        return True
+    except PermissionError:
+        print("Run VS Code/terminal as Administrator to set the policy (HKLM).")
+        return False
+
 def check_and_set_personalization(path_to_latest:str) -> bool:
     # first check if HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization has been set to latest.jpg
     has_personalization_policy = False
@@ -197,12 +225,13 @@ def set_lock_screen_image(image_path: str) -> bool:
     except OSError:
         pass
 
-    # first check if HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization has been set to latest.jpg
+    # first check if registry keys have been set
+    set_disable_spotlight_policy = check_and_set_spotlight_on_lockscreen()
     set_personalization_policy = check_and_set_personalization(path_to_latest)
     set_personalizationcsp_policy = check_and_set_personalizationcsp(path_to_latest)
 
     # Refresh group policy (best-effort)
-    if set_personalization_policy or set_personalizationcsp_policy:
+    if set_disable_spotlight_policy or set_personalization_policy or set_personalizationcsp_policy:
         try:
             subprocess.run(["gpupdate", "/target:computer", "/force"], check=False)
         except Exception:
@@ -210,6 +239,62 @@ def set_lock_screen_image(image_path: str) -> bool:
 
         print("Lock screen image policy set. You may need to sign out or lock (Win+L) to see it.")
     return True
+
+def uninstall_spotlight_now():
+    # only remove the specific registry keys we set, or set them back to 1 if they are built in keys
+    # DisableWindowsSpotlightOnLockScreen
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"SOFTWARE\Policies\Microsoft\Windows\CloudContent", 0,
+                             winreg.KEY_ALL_ACCESS)
+        winreg.DeleteValue(key, "DisableWindowsSpotlightOnLockScreen")
+        winreg.CloseKey(key)
+    except FileNotFoundError:
+        pass
+
+    # LockScreenImage
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"SOFTWARE\Policies\Microsoft\Windows\Personalization", 0,
+                             winreg.KEY_ALL_ACCESS)
+        winreg.DeleteValue(key, "LockScreenImage")
+        # winreg.DeleteValue(key, "NoChangingLockScreen")
+        winreg.CloseKey(key)
+    except FileNotFoundError:
+        pass
+
+    # LockScreenImagePath, LockScreenImageUrl, LockScreenImageStatus
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP", 0,
+                             winreg.KEY_ALL_ACCESS)
+        winreg.DeleteValue(key, "LockScreenImagePath")
+        winreg.DeleteValue(key, "LockScreenImageUrl")
+        winreg.DeleteValue(key, "LockScreenImageStatus")
+        winreg.CloseKey(key)
+    except FileNotFoundError:
+        pass
+
+    # spotlight specific we disabled, set back to 1
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager", 0,
+                             winreg.KEY_ALL_ACCESS)
+        for name in ("RotatingLockScreenEnabled",
+                     "RotatingLockScreenOverlayEnabled",
+                     "SubscribedContent-338387Enabled"):
+            try:
+                winreg.SetValueEx(key, name, 0, winreg.REG_DWORD, 1)
+            except OSError:
+                pass
+        winreg.CloseKey(key)
+    except FileNotFoundError:
+        pass
+
+    try:
+        subprocess.run(["gpupdate", "/target:computer", "/force"], check=False)
+    except Exception:
+        pass
 
 def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -223,11 +308,18 @@ def parse_args() -> argparse.ArgumentParser:
         help="Download the latest Windows Spotlight images.",
     )
     download.set_defaults(func=lambda args: download_spotlight_images())
-    update =commands.add_parser(
+
+    update = commands.add_parser(
         "update-lockscreen",
         help="Update the Windows lockscreen with a random least used image.",
     )
     update.set_defaults(func=lambda args: update_lockscreen_image())
+
+    uninstall = commands.add_parser(
+        "uninstall",
+        help="Uninstall the lockscreen image policy set by this script.",
+    )
+    uninstall.set_defaults(func=lambda args: uninstall_spotlight_now())
     return parser.parse_args()
 
 def download_spotlight_images(args: argparse.Namespace = None):

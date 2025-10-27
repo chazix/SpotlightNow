@@ -21,21 +21,17 @@ REM Script directory (always points to where install.bat lives)
 set SCRIPT_DIR=%~dp0
 set TARGET_DIR=C:\ProgramData\SpotlightNow
 
-echo Creating %TARGET_DIR% ...
-if not exist "%TARGET_DIR%" (
-    mkdir "%TARGET_DIR%"
-)
+:: remove scheduled tasks
+schtasks /Delete /TN "SpotlightNow-Download" /F
+schtasks /Delete /TN "SpotlightNow-UpdateLockscreen" /F
 
-echo Copying spotlight-now.exe and config.json ...
-copy /Y "%SCRIPT_DIR%spotlight-now.exe" "%TARGET_DIR%"
-copy /Y "%SCRIPT_DIR%config.json" "%TARGET_DIR%"
+:: call uninstall function in spotlight-now.exe
+echo Running SpotlightNow uninstall ...
+call "%TARGET_DIR%\spotlight-now.exe" uninstall
 
-echo Running PowerShell setup scripts ...
-powershell -ExecutionPolicy Bypass -File "%SCRIPT_DIR%download-task.ps1"
-powershell -ExecutionPolicy Bypass -File "%SCRIPT_DIR%update-task.ps1"
-:: run initial download and lockscreen update in order
-powershell -ExecutionPolicy Bypass -File "%SCRIPT_DIR%run-tasks.ps1"
+echo Deleting files in %TARGET_DIR% ...
+rd /S /Q "%TARGET_DIR%"
 
-echo Installation complete.
+echo Uninstallation complete.
 pause
 endlocal
