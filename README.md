@@ -9,7 +9,7 @@ Includes deduplication (via hashing) and fair rotation (least‑used image selec
 ## Quick Start (no Python required)
 
 1. Download the latest release zip from [Releases](https://github.com/chazix/SpotlightNow/releases/latest)
-2. Extract and run `install.bat`
+2. Extract and run `install.bat` (requires admin elevation)
 3. Enjoy daily Spotlight lock screen refreshes 🎉
 
 ### Uninstall
