@@ -62,6 +62,54 @@ python spotlight-now.py uninstall
 
 ---
 
+## Build from Source (PyInstaller)
+
+If you prefer not to use the prebuilt executable, you can generate your own
+binary directly from the source.
+
+1. Install [PyInstaller](https://pyinstaller.org/) into your Python environment (included in `requirements.txt`):
+```
+pip install pyinstaller
+```
+
+2. From the project root, run:
+```
+pyinstaller --clean --noconsole --onefile spotlight-now.py
+```
+
+3. The resulting executable will be placed in the `dist/` directory.
+
+---
+
+## False Positives (Antivirus / VirusTotal)
+
+SpotlightNow executables built with [PyInstaller](https://pyinstaller.org/) may
+be flagged by some antivirus engines or show a poor score on VirusTotal.
+This is a **known false positive** pattern that affects many PyInstaller
+applications.
+
+**Why this happens:**
+- PyInstaller bundles Python code into a self‑extracting EXE. The unpacking
+  behavior resembles how some malware hides payloads.
+- SpotlightNow modifies a small set of Windows registry keys and scheduled
+  tasks to control the lock screen. Heuristic scanners often flag any unsigned
+  binary that touches `HKLM` or `HKCU` keys.
+- Most detections are labeled as *“Generic Trojan”* or *“Heur.ML”*, which are
+  machine‑learning guesses, not signatures of real malware.
+
+**How to verify safety:**
+- Review the [source code](./spotlight-now.py) — everything is published and auditable.
+- Build your own binary using the documented PyInstaller command:
+```
+pyinstaller --clean --noconsole --onefile spotlight-now.py
+```
+- Check the SHA256 checksum of the release binary against the one published in the release notes.
+- Optionally upload your build to: [VirusTotal](https://www.virustotal.com/) to confirm results.
+
+SpotlightNow is transparent, reversible, and documented. The flagged behavior is expected given the registry and task modifications, but the code is clean and open for inspection.
+
+---
+
 ## Usage
 
 ```
