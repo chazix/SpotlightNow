@@ -1,10 +1,11 @@
 @echo off
 :: ============================================================
-:: SpotlightNow Installer
-:: NOTE: This script requires Administrator rights.
-::       Admin is required because scheduled tasks must run
-::       with elevated privileges and files are written to
-::       C:\ProgramData\SpotlightNow.
+:: SpotlightNow Uninstaller
+:: NOTE: This script must be run with Administrator rights.
+:: Required because:
+::   - Scheduled tasks are created/removed with elevated privileges
+::   - Registry policies under HKLM are deleted
+::   - Application data at C:\ProgramData\SpotlightNow is removed
 :: ============================================================
 
 :: --- Self-elevate to Administrator if not already ---
@@ -17,7 +18,7 @@ if %errorLevel% neq 0 (
 
 setlocal
 
-REM Script directory (always points to where install.bat lives)
+REM Script directory (always points to where uninstall.bat lives)
 set SCRIPT_DIR=%~dp0
 set TARGET_DIR=C:\ProgramData\SpotlightNow
 
