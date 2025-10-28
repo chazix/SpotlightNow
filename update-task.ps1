@@ -1,11 +1,25 @@
 # Action: run spotlight-now.exe update-lockscreen
-$Action = New-ScheduledTaskAction -Execute "C:\ProgramData\SpotlightNow\spotlight-now.exe" -Argument "update-lockscreen" -WorkingDirectory "C:\ProgramData\SpotlightNow"
+$Action = New-ScheduledTaskAction `
+    -Execute "C:\ProgramData\SpotlightNow\spotlight-now.exe" `
+    -Argument "update-lockscreen" `
+    -WorkingDirectory "C:\ProgramData\SpotlightNow"
 
-# Trigger: run at user logon
-$Trigger = New-ScheduledTaskTrigger -AtLogon
+# Trigger 1: run at user logon
+$Trigger1 = New-ScheduledTaskTrigger -AtLogon
 
-# Run as SYSTEM with highest privileges
+# Trigger 2: start 8 hours from now, then repeat every 8 hours indefinitely
+$StartTime = (Get-Date).AddHours(8)
+
+$Trigger2 = New-ScheduledTaskTrigger -Once -At $StartTime `
+    -RepetitionInterval (New-TimeSpan -Hours 8)
+
+# Principal: run as current user with highest privileges
 $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel Highest
 
-# Register the task
-Register-ScheduledTask -TaskName "SpotlightNow-UpdateLockscreen" -Action $Action -Trigger $Trigger -Principal $Principal -Description "Update lock screen image at logon"
+# Register the task with both triggers
+Register-ScheduledTask `
+    -TaskName "SpotlightNow-UpdateLockscreen" `
+    -Action $Action `
+    -Trigger @($Trigger1, $Trigger2) `
+    -Principal $Principal `
+    -Description "Update lock screen image at logon and every 8 hours"

@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Build process updated: rebuilt with PyInstaller `--noconsole` so scheduled tasks run silently in the user session.
   - This was required because the update task now runs under the current user (to correctly target HKCU), and a console build would otherwise show a visible window.
 - `update-task.ps1`: switch to `-AtLogon` trigger to align with per-user context (startup trigger requires SYSTEM)
+- `update-task.ps1`: added `$Trigger2` to run every 8 hours indefinitely, ensuring lock screen updates on always‑on systems.
 - `download-task.ps1`: attempt to grab spotlight images every 1 hour indefinitely.
 
 ### Documentation

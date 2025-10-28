@@ -6,7 +6,7 @@
 [![Issues](https://img.shields.io/github/issues/chazix/SpotlightNow)](https://github.com/chazix/SpotlightNow/issues)
 
 A reproducible ritual for keeping your Windows lock screen fresh with the latest Spotlight images.  
-Fetches new images daily, archives them, and updates the lock screen using the *Personalization* and *PersonalizationCSP* registry keys.  
+Fetches new images hourly, archives them, and updates the lock screen using the *Personalization* and *PersonalizationCSP* registry keys.
 Includes deduplication (via hashing) and fair rotation (least‑used image selection tracked in `image_cache.json`).
 
 ---
